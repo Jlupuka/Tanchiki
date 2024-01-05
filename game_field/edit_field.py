@@ -1,45 +1,9 @@
 import pygame
 import service
+import game_board
 
 
-class Board:
-    def __init__(self, rows: int, cols: int) -> None:
-        self.rows = rows
-        self.cols = cols
-        self.tank_position = None
-        self.board = [[0] * cols for _ in range(rows)]
-        self.left = 15
-        self.top = 20
-        self.cell_size = 32
-
-    def get_cell(self, mouse_pos: tuple[int, int]) -> None | tuple[int, int]:
-        x, y = mouse_pos
-        if self.left <= x <= self.left + self.cols * self.cell_size and \
-                self.top <= y <= self.top + self.rows * self.cell_size:
-            cell_x = (x - self.left) // self.cell_size
-            cell_y = (y - self.top) // self.cell_size
-            return cell_x, cell_y
-        return
-
-    def on_click(self, cell_coords: tuple[int, int], type_key: int) -> None:
-        x, y = cell_coords
-        self.board[y][x] = type_key if not self.board[y][x] else 0
-
-    def get_click(self, mouse_pos: tuple[int, int], type_key: int) -> None:
-        cell = self.get_cell(mouse_pos)
-        if cell:
-            self.on_click(cell, type_key)
-
-    def save_to_file(self) -> None:
-        max_level = service.top_level()
-        print(max_level)
-        with open(f'levels/level_{max_level + 1}.txt', 'w') as file:
-            for row in self.board:
-                file.write(','.join(map(str, row)))
-                file.write('\n')
-
-
-class EditableBoard(Board):
+class EditableBoard(game_board.Board):
     def __init__(self, rows: int, cols: int) -> None:
         super().__init__(rows, cols)
         self.box = service.load_image('box.png', 'landscape', size=self.cell_size)
@@ -86,6 +50,14 @@ class EditableBoard(Board):
                       self.top + (self.tank_position[1] - 1) * self.cell_size + self.cell_size - 8),
                      (0, 0, self.cell_size // 4, self.cell_size // 4)
                      )
+
+    def save_to_file(self) -> None:
+        max_level = service.top_level()
+        print(max_level)
+        with open(f'levels/level_{max_level + 1}.txt', 'w') as file:
+            for row in self.board:
+                file.write(','.join(map(str, row)))
+                file.write('\n')
 
 
 def main():
