@@ -1,5 +1,5 @@
+import os
 import pygame
-
 from game_field import service
 
 
@@ -9,11 +9,13 @@ class Images:
         self.patron = service.load_image('patron.png', 'tanks', size=cell_size // 4)
         self.default = service.load_image('dirt.png', 'landscape', size=cell_size)
         self.stone = service.load_image('cobblestone.png', 'landscape', size=cell_size)
-        self.user_tank = service.load_image('user_tank_1.png', 'tanks', 'users', size=cell_size)
-        self.enemy = service.load_image('enemy_tank_1.png',
-                                        'tanks', 'enemy',
-                                        size=cell_size,
-                                        rotate=True)
+        # self.user_tank = service.load_image('user_tank_1.png', 'tanks', 'users', size=cell_size)
+        # self.enemy = service.load_image('enemy_tank_1.png',
+        #                                 'tanks', 'enemy',
+        #                                 size=cell_size,
+        #                                 rotate=True)
+        self.enemy = service.load_animation(True, 'tanks', 'enemy')
+        self.user_tank = service.load_animation(False, 'tanks', 'users')
 
 
 class Board(Images):

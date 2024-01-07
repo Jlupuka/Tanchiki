@@ -1,7 +1,6 @@
 import os
 import re
 import sys
-from pprint import pprint
 
 import pygame
 
@@ -41,3 +40,8 @@ def load_level(filename: str) -> list[list[int]]:
     with open(filename, 'r') as mapFile:
         level_map = list(list(map(int, line.strip().split(','))) for line in mapFile)
     return level_map
+
+
+def load_animation(rotate: bool, *name_dir: str) -> list[pygame.Surface]:
+    file_names = os.listdir('../pictures/' + '/'.join(name_dir))
+    return list(load_image(filename, *name_dir, rotate=rotate) for filename in file_names)
