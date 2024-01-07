@@ -1,6 +1,8 @@
 import os
 import re
 import sys
+from pprint import pprint
+
 import pygame
 
 
@@ -31,3 +33,11 @@ def top_level(dir_name: str = 'levels') -> int:
     # Используем регулярное выражение для поиска чисел в названиях файлов
     numbers = [int(re.search(r'\d+', file_name).group()) for file_name in file_names]
     return max(numbers) if numbers else 0
+
+
+def load_level(filename: str) -> list[list[int]]:
+    filename = "levels/" + filename
+    # читаем уровень, убирая символы перевода строки
+    with open(filename, 'r') as mapFile:
+        level_map = list(list(map(int, line.strip().split(','))) for line in mapFile)
+    return level_map
