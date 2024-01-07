@@ -4,7 +4,6 @@ import sys
 pygame.mixer.init()
 pygame.init()
 
-# RED = (201, 48, 48)
 RED = (255, 0, 0)
 CLASSIC = (194, 192, 192)
 
@@ -17,11 +16,11 @@ def title_text(scr, message, x, y, font_color=CLASSIC, font_size=150,
     text = font_type.render(message, True, font_color)  # Текст + Цвет
     button_rect = text.get_rect(center=(x, y))  # Расположение
     scr.blit(text, button_rect.topleft)  # Отображение
-    return button_rect  # Возращаем координаты
+    return button_rect  # Возвращаем координаты
 
 
 def menu():
-    size = width, height = 1000, 820  # Размеры окна
+    size = 1000, 820  # Размеры окна
     screen = pygame.display.set_mode(size)
     clock = pygame.time.Clock()
 
@@ -46,37 +45,34 @@ def menu():
                 pygame.quit()
                 sys.exit()
 
-            if pygame.mouse.get_pressed()[0] == 1:  # Срабатывание на ЛКМ
-                if button_start.collidepoint(event.pos):  # Если клик был на кнопке "Играть"
-                    print("Кнопка 'Играть' нажата")
-                    pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                    pygame.time.delay(500)  # Задержка 500мс
-                elif button_music.collidepoint(event.pos):  # Если клик был на кнопке "Музыка"
-                    print("Кнопка 'Музыка' нажата")
-                    if count > 0:
-                        count = 0
-                    else:
-                        count = 1
-                    pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                    pygame.time.delay(200)  # Задержка 500мс
-                    pygame.mixer.music.set_volume(count)  # Устанавливаем громкость
-                elif button_setting.collidepoint(event.pos):  # Если клик был на кнопке "Настройки"
-                    print("Кнопка 'Настройки' нажата")
-                    pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                    pygame.time.delay(500)  # Задержка 500мс
-                elif button_creator.collidepoint(event.pos):  # Если клик был на кнопке "Творец"
-                    print("Кнопка 'Творец' нажата")
-                    pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                    pygame.time.delay(500)  # Задержка 500мс
-            elif event.type == pygame.MOUSEBUTTONDOWN:  # Срабатывание на СКМ
-                if event.button == 4:  # Колесико мыши кручено вверх
-                    if button_music.collidepoint(event.pos):
+            elif event.type == pygame.MOUSEBUTTONDOWN:  # Срабатывание на ЛКМ
+                if pygame.mouse.get_pressed()[0] == 1:
+                    if button_start.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Играть"
+                        print("Кнопка 'Играть' нажата")
+                        pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
+                    elif button_music.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Музыка"
+                        print("Кнопка 'Музыка' нажата")
+                        if count > 0:
+                            count = 0
+                        else:
+                            count = 1
+                        pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
+                        pygame.mixer.music.set_volume(count)  # Устанавливаем громкость
+                    elif button_setting.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Настройки"
+                        print("Кнопка 'Настройки' нажата")
+                        pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
+                    elif button_creator.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Творец"
+                        print("Кнопка 'Творец' нажата")
+                        pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
+                elif event.button == 4:  # Колесико мыши кручено вверх
+                    if button_music.collidepoint(pygame.mouse.get_pos()):
                         count += 0.1
                         if count > 1:
                             count = 1
                         pygame.mixer.music.set_volume(count)
                 elif event.button == 5:  # Колесико мыши кручено вниз
-                    if button_music.collidepoint(event.pos):
+
+                    if button_music.collidepoint(pygame.mouse.get_pos()):
                         count -= 0.1
                         if count < 0:
                             count = 0
@@ -96,7 +92,7 @@ def menu():
         # Творец
         button_creators = button_creator.collidepoint(mouse_pos)  # Присваиваем
 
-        background_image = pygame.image.load('Pictures/2.jpg')  # Фоновая картинка(путь)
+        background_image = pygame.image.load('pictures/2.jpg')  # Фоновая картинка(путь)
         screen.blit(background_image, (0, 0))  # Размещение картинки в окне
 
         if button_starting:  # Если курсор в поле кнопки "Играть"
