@@ -6,43 +6,6 @@ import game_board
 class EditableBoard(game_board.Board):
     def __init__(self, rows: int, cols: int) -> None:
         super().__init__(rows, cols)
-        self.box = service.load_image('box.png', 'landscape', size=self.cell_size)
-        self.patron = service.load_image('patron.png', 'tanks', size=self.cell_size // 4)
-        self.default = service.load_image('dirt.png', 'landscape', size=self.cell_size)
-        self.stone = service.load_image('cobblestone.png', 'landscape', size=self.cell_size)
-        self.user_tank = service.load_image('user_tank_1.png', 'tanks', 'users', size=self.cell_size)
-        self.enemy = service.load_image('enemy_tank_1.png',
-                                        'tanks', 'enemy',
-                                        size=self.cell_size,
-                                        rotate=True)
-
-    def render(self, surface: pygame.Surface) -> None:
-        for y in range(self.rows):
-            for x in range(self.cols):
-                surface.blit(self.default,
-                             (self.left + x * self.cell_size, self.top + y * self.cell_size),
-                             (0, 0, self.cell_size, self.cell_size)
-                             )
-                if self.board[y][x] == pygame.K_1:
-                    surface.blit(self.stone,
-                                 (self.left + x * self.cell_size, self.top + y * self.cell_size),
-                                 (0, 0, self.cell_size, self.cell_size)
-                                 )
-                elif self.board[y][x] == pygame.K_0:
-                    surface.blit(self.user_tank,
-                                 (self.left + x * self.cell_size, self.top + y * self.cell_size),
-                                 (0, 0, self.cell_size, self.cell_size)
-                                 )
-                elif self.board[y][x] == pygame.K_2:
-                    surface.blit(self.box,
-                                 (self.left + x * self.cell_size, self.top + y * self.cell_size),
-                                 (0, 0, self.cell_size, self.cell_size)
-                                 )
-                elif self.board[y][x] == pygame.K_3:
-                    surface.blit(self.enemy,
-                                 (self.left + x * self.cell_size, self.top + y * self.cell_size),
-                                 (0, 0, self.cell_size, self.cell_size)
-                                 )
 
     def patron_load(self, surface: pygame.Surface) -> None:
         surface.blit(self.patron,
