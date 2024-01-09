@@ -1,5 +1,4 @@
-from typing import Tuple, List, Any
-
+from typing import Any
 import pygame
 import config
 import datetime
@@ -284,7 +283,6 @@ class Dirt(BaseSprite):
 
 
 def sort_level(board_level: list[list[int]], images: Images) -> list[Any]:
-    new_player = None
     tanks = {
         'user': list(),
         'enemy': list()
@@ -315,6 +313,7 @@ def main(filename: str) -> None:
     screen = pygame.display.set_mode(size)
     images = Images(cell_size=cell_size)
     load_bord = service.load_level(filename=filename)
+    player = None
     player_start_pos = sort_level(load_bord, images)
     player_life = 3
     clock = pygame.time.Clock()
