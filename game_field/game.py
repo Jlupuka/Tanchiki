@@ -24,17 +24,6 @@ count_destroyed_enemy = 0
 count_destroyed_user = 0
 
 
-def check_collision_at_direction(sprite: pygame.sprite, direction_x: int, direction_y: int) -> bool:
-    new_rect = sprite.rect.copy()
-    new_rect.x += direction_x * cell_size
-    new_rect.y += direction_y * cell_size
-    for sprite_group in (box_sprite, stone_sprite):
-        for sprite_to_check in sprite_group.sprites():
-            if sprite_to_check.rect.colliderect(new_rect):
-                return True
-    return False
-
-
 class BaseSprite(pygame.sprite.Sprite):
     def __init__(self, image: pygame.Surface | list[pygame.Surface], x_pos: int, y_pos: int, *groups) -> None:
         super().__init__(*groups)
@@ -314,6 +303,7 @@ def main(filename: str) -> None:
     images = Images(cell_size=cell_size)
     load_bord = service.load_level(filename=filename)
     player = None
+    flag_pause = False
     player_start_pos = sort_level(load_bord, images)
     player_life = 3
     clock = pygame.time.Clock()
@@ -321,41 +311,51 @@ def main(filename: str) -> None:
     angle = target_angle = 0
     running = True
     while running:
-        if count_destroyed_user in (0, 1, 2) and len(user_sprite.sprites()) < 1:
-            player_life -= 1
-            player = UserTank(image=images.user_tank, x_pos=player_start_pos[0], y_pos=player_start_pos[1])
-        if count_destroyed_user == 3:
-            running = False
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        if flag_pause is False:
+            if count_destroyed_user in (0, 1, 2) and len(user_sprite.sprites()) < 1:
+                player_life -= 1
+                player = UserTank(image=images.user_tank, x_pos=player_start_pos[0], y_pos=player_start_pos[1])
+            if count_destroyed_user == 3:
                 running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    Patron(images.patron, player.rect.x, player.rect.y, angle)
-        for bullet in patron_sprite.sprites():
-            bullet.move()
-        for enemy in enemy_sprite.sprites():
-            enemy.move()
-        keys = pygame.key.get_pressed()
-        if keys[config.control['up']]:
-            target_angle = rotate_mapping_user['up']
-            player.move('up')
-        elif keys[config.control['down']]:
-            target_angle = rotate_mapping_user['down']
-            player.move('down')
-        elif keys[config.control['left']]:
-            target_angle = rotate_mapping_user['left']
-            player.move('left')
-        elif keys[config.control['right']]:
-            target_angle = rotate_mapping_user['right']
-            player.move('right')
-        if target_angle != angle:
-            angle = target_angle
-            player.flip(angle)
-        screen.fill(pygame.Color('black'))
-        all_sprite.draw(screen)
-        pygame.display.flip()
-        clock.tick(fps)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        Patron(images.patron, player.rect.x, player.rect.y, angle)
+                    elif event.key == pygame.K_ESCAPE:
+                        flag_pause = not flag_pause
+            keys = pygame.key.get_pressed()
+            for bullet in patron_sprite.sprites():
+                bullet.move()
+            for enemy in enemy_sprite.sprites():
+                enemy.move()
+            if keys[config.control['up']]:
+                target_angle = rotate_mapping_user['up']
+                player.move('up')
+            elif keys[config.control['down']]:
+                target_angle = rotate_mapping_user['down']
+                player.move('down')
+            elif keys[config.control['left']]:
+                target_angle = rotate_mapping_user['left']
+                player.move('left')
+            elif keys[config.control['right']]:
+                target_angle = rotate_mapping_user['right']
+                player.move('right')
+            if target_angle != angle:
+                angle = target_angle
+                player.flip(angle)
+            screen.fill(pygame.Color('black'))
+            all_sprite.draw(screen)
+            pygame.display.flip()
+            clock.tick(fps)
+        else:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        flag_pause = not flag_pause
 
 
 if __name__ == '__main__':

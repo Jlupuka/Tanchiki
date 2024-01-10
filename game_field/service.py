@@ -45,3 +45,8 @@ def load_level(filename: str) -> list[list[int]]:
 def load_animation(rotate: bool, *name_dir: str) -> list[pygame.Surface]:
     file_names = os.listdir('../pictures/' + '/'.join(name_dir))
     return list(load_image(filename, *name_dir, rotate=rotate) for filename in file_names)
+
+
+def percent_win(userdestroyed: int, enemydestroyed: int) -> str:
+    result = userdestroyed / (userdestroyed + enemydestroyed) * 100
+    return f'{result:.2F} %'
