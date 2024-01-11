@@ -2,7 +2,7 @@ from typing import Any
 import pygame
 import config
 import datetime
-from game_field import service
+from game_field import service, edit_field
 from game_field.game_board import Images
 
 all_sprite = pygame.sprite.Group()
@@ -317,6 +317,7 @@ def main(filename: str) -> None:
                 player = UserTank(image=images.user_tank, x_pos=player_start_pos[0], y_pos=player_start_pos[1])
             if count_destroyed_user == 3:
                 running = False
+                edit_field.main()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False

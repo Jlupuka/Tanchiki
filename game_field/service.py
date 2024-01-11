@@ -6,7 +6,7 @@ import pygame
 
 
 def load_image(name_file: str, *name_dir: str, color_key=None, size: int = 32, rotate: bool = False) -> pygame.Surface:
-    fullname = os.path.join('../pictures', *name_dir, name_file)
+    fullname = os.path.join('pictures', *name_dir, name_file)
     # если файл не существует, то выходим
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -35,7 +35,7 @@ def top_level(dir_name: str = 'levels') -> int:
 
 
 def load_level(filename: str) -> list[list[int]]:
-    filename = "levels/" + filename
+    filename = "game_field/levels/" + filename
     # читаем уровень, убирая символы перевода строки
     with open(filename, 'r') as mapFile:
         level_map = list(list(map(int, line.strip().split(','))) for line in mapFile)
@@ -43,7 +43,7 @@ def load_level(filename: str) -> list[list[int]]:
 
 
 def load_animation(rotate: bool, *name_dir: str) -> list[pygame.Surface]:
-    file_names = os.listdir('../pictures/' + '/'.join(name_dir))
+    file_names = os.listdir('pictures/' + '/'.join(name_dir))
     return list(load_image(filename, *name_dir, rotate=rotate) for filename in file_names)
 
 

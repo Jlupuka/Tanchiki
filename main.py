@@ -1,4 +1,5 @@
 import pygame
+import game_field
 import sys
 
 pygame.mixer.init()
@@ -49,6 +50,7 @@ def menu():
                 if pygame.mouse.get_pressed()[0] == 1:
                     if button_start.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Играть"
                         print("Кнопка 'Играть' нажата")
+                        game_field.game.main('level_4.txtd')
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
                     elif button_music.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Музыка"
                         print("Кнопка 'Музыка' нажата")
@@ -63,6 +65,7 @@ def menu():
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
                     elif button_creator.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Творец"
                         print("Кнопка 'Творец' нажата")
+                        game_field.edit_field.main()
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
                 elif event.button == 4:  # Колесико мыши кручено вверх
                     if button_music.collidepoint(pygame.mouse.get_pos()):

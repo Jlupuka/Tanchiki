@@ -1,6 +1,6 @@
 import pygame
-import service
-import game_board
+from . import service
+from . import game_board
 
 
 class EditableBoard(game_board.Board):
@@ -41,17 +41,18 @@ def main():
                 if key_mode:
                     if event.button == 1:  # Нажатие левой кнопки мыши
                         mouse_position = pygame.mouse.get_pos()
-                        x, y = life.get_cell(mouse_position)
-                        if key_mode == pygame.K_0:
-                            if user_tank is None:
-                                user_tank = (x, y)
+                        if bool(cord := life.get_cell(mouse_position)):
+                            x, y = cord
+                            if key_mode == pygame.K_0:
+                                if user_tank is None:
+                                    user_tank = (x, y)
+                                    life.get_click(mouse_position, key_mode)
+                                    life.tank_position = user_tank
+                                elif (x, y) == user_tank:
+                                    user_tank = None
+                                    life.get_click(mouse_position, key_mode)
+                            else:
                                 life.get_click(mouse_position, key_mode)
-                                life.tank_position = user_tank
-                            elif (x, y) == user_tank:
-                                user_tank = None
-                                life.get_click(mouse_position, key_mode)
-                        else:
-                            life.get_click(mouse_position, key_mode)
             elif event.type == pygame.KEYDOWN:
                 if event.key == key_mode:
                     key_mode = None
