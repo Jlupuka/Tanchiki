@@ -1,4 +1,3 @@
-import os
 import pygame
 from game_field import service
 
@@ -9,8 +8,13 @@ class Images:
         self.patron = service.load_image('patron.png', 'tanks', size=cell_size // 4)
         self.default = service.load_image('dirt.png', 'landscape', size=cell_size)
         self.stone = service.load_image('cobblestone.png', 'landscape', size=cell_size)
-        self.enemy = service.load_animation(True, 'tanks', 'enemy')
-        self.user_tank = service.load_animation(False, 'tanks', 'users')
+        self.enemy = service.load_animation(True, 'tanks', 'enemy', size=cell_size)
+        self.user_tank = service.load_animation(False, 'tanks', 'users', size=cell_size)
+        self.life = [
+            service.load_image('life_true.png', 'life', size=cell_size),
+            service.load_image('life_false.png', 'life', size=cell_size)
+        ]
+        self.pause = service.load_image('pause.png')
 
 
 class Board(Images):

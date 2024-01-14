@@ -1,11 +1,14 @@
 import pygame
+
+import main
 from . import service
 from . import game_board
 
 
 class EditableBoard(game_board.Board):
-    def __init__(self, rows: int, cols: int) -> None:
+    def __init__(self, rows: int, cols: int, username: str = 'admin') -> None:
         super().__init__(rows, cols)
+        self.username = username
 
     def patron_load(self, surface: pygame.Surface) -> None:
         surface.blit(self.patron,
@@ -23,11 +26,11 @@ class EditableBoard(game_board.Board):
                 file.write('\n')
 
 
-def main():
+def edit_window(username: str):
     pygame.init()
     size = 640, 640
     screen = pygame.display.set_mode(size)
-    life = EditableBoard(19, 19)
+    life = EditableBoard(19, 19, username)
     clock = pygame.time.Clock()
     fps = 75
     running = True
@@ -68,6 +71,11 @@ def main():
                     patron = True
                 elif event.key == pygame.K_s:
                     life.save_to_file()
+                elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    pygame.init()
+                    pygame.mixer.init()
+                    main.menu(username)
         screen.fill(pygame.Color('black'))
         life.render(screen)
         if patron and user_tank:
@@ -78,4 +86,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    edit_window('admin')
