@@ -1,8 +1,11 @@
 import pygame
 import sys
 import os
-# from game_field import game
-# from game_field import edit_field
+
+from database_api.database import DataBase
+from game_field import game
+from game_field import service
+from game_field import edit_field
 
 pygame.mixer.init()
 pygame.init()
@@ -11,13 +14,13 @@ RED = (255, 0, 0)
 CLASSIC = (194, 192, 192)
 CLASSIC_Menu = (255, 255, 255)
 BLACK = (0, 0, 0)
-
 button_click = pygame.mixer.Sound('Sounds/9283.mp3')  # Путь к звуку клика
 
 folder_path = "game_field/levels"  # Путь к уровням
 
 users = 'Введите логин'
 password = 'Введите пароль'
+database = DataBase()
 
 # Загружаем музыку
 music_file = 'Sounds/за фрукты да.mp3'
@@ -49,13 +52,14 @@ def title_text(scr, message, x, y, font_color=CLASSIC, font_size=150,
     return button_rect  # Возвращаем координаты
 
 
-def menu():
-    global count
+def menu(username: str = str()):
+    global count, users
+    if username:
+        users = username
     size = 1000, 820  # Размеры окна
     screen = pygame.display.set_mode(size)
     clock = pygame.time.Clock()
     pygame.display.set_caption('Меню')
-
     button_start = title_text(screen, 'Начать', 500, 150)  # Создаём рабочую площадь кнопки "Играть"
     button_music = title_text(screen, 'М', 100, 100, 0)  # Создаём рабочую площадь кнопки "Музыка"
     button_setting = title_text(screen, 'M', 100, 240, 0)  # Создаём рабочую площадь кнопки "Настройки"
@@ -72,12 +76,10 @@ def menu():
             elif event.type == pygame.MOUSEBUTTONDOWN:  # Срабатывание на ЛКМ
                 if pygame.mouse.get_pressed()[0] == 1:
                     if button_start.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Играть"
-                        print("Кнопка 'Играть' нажата")
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
                         choose_level()
                         pygame.quit()
                     elif button_music.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Музыка"
-                        print("Кнопка 'Музыка' нажата")
                         if count > 0:
                             count = 0
                         else:
@@ -85,20 +87,18 @@ def menu():
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
                         pygame.mixer.music.set_volume(count)  # Устанавливаем громкость
                     elif button_setting.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Настройки"
-                        print("Кнопка 'Настройки' нажата")
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
                         setting()
                         pygame.quit()
                     elif button_creator.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Творец"
-                        print("Кнопка 'Творец' нажата")
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                        # edit_field.main()
-                        # pygame.quit()
+                        edit_field.edit_window(users)
+                        pygame.quit()
                     elif button_rait.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Рейтинг"
-                        print("Кнопка 'Рейтинг' нажата")
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
+                        raits(username if username else users)
+                        pygame.quit()
                     elif button_quit.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Выйти"
-                        print('Выход')
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
                         authorize()
                         pygame.quit()
@@ -186,12 +186,14 @@ def menu():
         # Музыка
         pygame.draw.polygon(screen, pygame.color.Color(42, 44, 92), ((50, 65), (157, 65), (157, 125), (50, 125)))
         pygame.draw.polygon(screen, pygame.color.Color('white'), ((50, 65), (157, 65), (157, 125), (50, 125)), 3)
-        title_text(screen, text_music, 105, 95, button_color_music, size_music)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
+        title_text(screen, text_music, 105, 95, button_color_music,
+                   size_music)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
 
         # Выйти
         pygame.draw.polygon(screen, pygame.color.Color(42, 44, 92), ((800, 65), (907, 65), (907, 125), (800, 125)))
         pygame.draw.polygon(screen, pygame.color.Color('white'), ((800, 65), (907, 65), (907, 125), (800, 125)), 3)
-        title_text(screen, 'Выйти', 855, 95, button_color_quit, 30)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
+        title_text(screen, 'Выйти', 855, 95, button_color_quit,
+                   30)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
 
         pygame.draw.polygon(screen, pygame.color.Color(42, 44, 92), ((50, 180), (157, 180), (157, 240), (50, 240)))
         pygame.draw.polygon(screen, pygame.color.Color('white'), ((50, 180), (157, 180), (157, 240), (50, 240)), 3)
@@ -221,7 +223,7 @@ def setting():
     button_fire = title_text(screen, 'F', 140, 680, 100)  # Создаём рабочую площадь кнопки "Огонь"
     button_return = title_text(screen, 'Вера', 850, 50, 10)  # Создаём рабочую площадь кнопки "Вернуться"
 
-    controllers = ['w', 'a', 'd', 's', 'space']
+    controllers = list(map(pygame.key.name, control.values()))
 
     waiting_for_input = False
 
@@ -259,7 +261,6 @@ def setting():
 
             elif event.type == pygame.KEYDOWN and waiting_for_input:
                 pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                print(f"Вы ввели клавишу: {pygame.key.name(event.key)}")
                 for key in range(len(controllers)):  # Ловим кнопку потерявшую управление
                     if controllers[key] == '?':
                         if key == 0:
@@ -343,11 +344,11 @@ def setting():
 
         title_text(screen, '- Вперед', 365, 88,
                    CLASSIC_Menu, 100)  # Создание текста (X+120, Y-2 для текста по кнопке)
-        title_text(screen, '- Влево ', 365, 238,
+        title_text(screen, '- Назад', 365, 238,
                    CLASSIC_Menu, 100)  # Создание текста (X+120, Y-2 для текста по кнопке)
-        title_text(screen, '- Вправо', 365, 388,
+        title_text(screen, '- Влево', 365, 388,
                    CLASSIC_Menu, 100)  # Создание текста (X+120, Y-2 для текста по кнопке)
-        title_text(screen, '- Назад ', 365, 538,
+        title_text(screen, '- Вправо ', 365, 538,
                    CLASSIC_Menu, 100)  # Создание текста (X+120, Y-2 для текста по кнопке)
         title_text(screen, '- Огонь ', 365, 688,
                    CLASSIC_Menu, 100)  # Создание текста (X+120, Y-2 для текста по кнопке)
@@ -362,7 +363,7 @@ def choose_level():
     clock = pygame.time.Clock()
     pygame.display.set_caption('Выбор уровня')
 
-    file_list = []
+    file_list = list()
 
     # Проверяем наличие указанной папки
     if os.path.exists(folder_path):
@@ -373,7 +374,7 @@ def choose_level():
                 # Проверяем расширение файла
                 if file_name.endswith(".txt"):
                     file_list.append(file_name)
-
+    file_list.sort()
     lvl = 0
     check_left = False
     check_right = False
@@ -394,20 +395,17 @@ def choose_level():
                     menu()
                     pygame.quit()
                 elif button_right.collidepoint(
-                        pygame.mouse.get_pos()) and check_right == False:  # Если клик был на кнопке "Вправо"
+                        pygame.mouse.get_pos()) and check_right is False:  # Если клик был на кнопке "Вправо"
                     pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                    print('Вправо')
                     lvl += 1
                 elif button_left.collidepoint(
-                        pygame.mouse.get_pos()) and check_left == False:  # Если клик был на кнопке "Влево"
+                        pygame.mouse.get_pos()) and check_left is False:  # Если клик был на кнопке "Влево"
                     pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                    print('Влево')
                     lvl -= 1
                 elif button_choose.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Выбрать"
                     pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                    print(f'Вы выбрали уровень {lvl + 1}')
-                    # game.main(filename=str(file_list[lvl]))
-                    # pygame.quit()
+                    game.game(filename=str(file_list[lvl]), control=control, username=users, database=database)
+                    pygame.quit()
 
         mouse_pos = pygame.mouse.get_pos()  # Получаем координаты мыши
 
@@ -501,17 +499,14 @@ def authorize():
                     if button_signin.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Войти"
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
                         logging = True
-                        print('Войти')
                         login_register()
                         pygame.quit()
                     elif button_signup.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Регистрация"
                         pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
                         logging = False
-                        print('Регистрация')
                         login_register()
                         pygame.quit()
                     elif button_music.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Музыка"
-                        print("Кнопка 'Музыка' нажата")
                         if count > 0:
                             count = 0
                         else:
@@ -628,15 +623,19 @@ def login_register():
                     pygame.quit()
                 elif button_confirm.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Подтвердить"
                     pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                    print('Подтверждение')
-                    print(users)
-                    print(password)
-                    menu()
-                    pygame.quit()
+                    if users != '' and users != 'Введите логин' and password != '' and password != 'Введите пароль':
+                        if database.check_username(str(users)) and logging:  # Проверяет есть ли users в бд
+                            if database.check_password(str(users),
+                                                       str(password)):  # Проверяет правильность ввода пароля
+                                menu()
+                                pygame.quit()
+                        if database.check_username(str(users)) == False and logging == False:
+                            database.create_account(str(users), str(password))  # Если нет аккаунта, то регистрация
+                            menu()
+                            pygame.quit()
 
             elif event.type == pygame.KEYDOWN:
                 pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
-                print(f"Вы ввели клавишу: {pygame.key.name(event.key)}")
                 if helper:
                     if str(pygame.key.name(event.key)) == 'backspace':
                         if len(users) > 0:
@@ -650,9 +649,12 @@ def login_register():
                         if len(password) > 0:
                             password = password[:-1]
                     elif str(pygame.key.name(event.key)) == 'space':
-                        password += ' '
+                        if len(password) < 20:
+                            password += ' '
+
                     elif str(pygame.key.name(event.key)) not in stop_list:
-                        password += pygame.key.name(event.key)
+                        if len(password) < 20:
+                            password += pygame.key.name(event.key)
 
         mouse_pos = pygame.mouse.get_pos()  # Получаем координаты мыши
 
@@ -691,9 +693,68 @@ def login_register():
 
         # Подтвердить
         pygame.draw.polygon(screen, pygame.color.Color(23, 163, 28), ((320, 515), (680, 515), (680, 585), (320, 585)))
-        pygame.draw.polygon(screen, pygame.color.Color('dark gray'), ((320, 515), (680, 515), (680, 585), (320, 585)), 3)
+        pygame.draw.polygon(screen, pygame.color.Color('dark gray'), ((320, 515), (680, 515), (680, 585), (320, 585)),
+                            3)
         title_text(screen, 'Подтвердить', 505, 545,
                    button_color_confirm, 80)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
+
+        pygame.display.flip()  # Отобразить всё на экране
+        clock.tick(60)
+
+
+def raits(users: str = str()):
+    size = 1000, 820  # Размеры окна
+    screen = pygame.display.set_mode(size)
+    clock = pygame.time.Clock()
+    pygame.display.set_caption('Рейтинг')
+
+    button_return = title_text(screen, 'Вера', 850, 50, 10)
+    # Создаём рабочую площадь кнопки "Вернуться"
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:  # Срабатывание на ЛКМ
+                if button_return.collidepoint(pygame.mouse.get_pos()):  # Если клик был на кнопке "Вернуться"
+                    pygame.mixer.Sound.play(button_click)  # Звук при нажатии на кнопку
+                    menu()
+                    pygame.quit()
+
+        mouse_pos = pygame.mouse.get_pos()  # Получаем координаты мыши
+
+        # Вернуться
+        button_returns = button_return.collidepoint(mouse_pos)  # Присваиваем
+
+        if button_returns:  # Если курсор в поле кнопки "Вернуться"
+            button_color_return = RED
+        else:  # Если курсор не в поле кнопки "Вернуться"
+            button_color_return = CLASSIC
+
+        background_image = pygame.image.load('pictures/2.jpg')  # Фоновая картинка(путь)
+        screen.blit(background_image, (0, 0))  # Размещение картинки в окне
+
+        title_text(screen, 'Вернуться', 855, 55,
+                   button_color_return, 50)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
+
+        title_text(screen, 'Ваш рейтинг:', 300, 105,
+                   CLASSIC, 100)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
+
+        title_text(screen, str(service.percent_win(database.get_data(users)[0], database.get_data(users)[1])), 620, 105,
+                   CLASSIC_Menu, 100)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
+
+        title_text(screen, 'Ваши поражения:', 250, 205,
+                   CLASSIC, 50)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
+
+        title_text(screen, str(database.get_data(users)[0]), 530, 205,
+                   CLASSIC_Menu, 100)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
+
+        title_text(screen, 'Уничтоженные танки:', 285, 305,
+                   CLASSIC, 50)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
+
+        title_text(screen, str(database.get_data(users)[1]), 565, 305,
+                   CLASSIC_Menu, 100)  # Создание текста кнопки (X+5, Y-5 для текста по кнопке)
 
         pygame.display.flip()  # Отобразить всё на экране
         clock.tick(60)

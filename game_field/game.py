@@ -20,6 +20,11 @@ rotate_mapping_enemy = {key: degree for degree, key in zip(degrees_enemy,
                                                             'right': pygame.K_a,
                                                             'bullet': pygame.K_SPACE})}
 
+pygame.mixer.init()
+pygame.init()
+
+button_shot = pygame.mixer.Sound('Sounds/shott.mp3')  # Путь к звуку выстрела
+
 
 class BaseSprite(pygame.sprite.Sprite):
     def __init__(self, image: pygame.Surface | list[pygame.Surface], x_pos: int, y_pos: int, *groups) -> None:
@@ -111,7 +116,8 @@ class EnemyTank(BaseSprite):
         if self.target is not None:
             dx, dy = self.target.rect.x - self.rect.x, self.target.rect.y - self.rect.y
             distance = (dx ** 2 + dy ** 2) ** 0.5
-            if distance > cell_size:  # Only move if the target is at least one cell away
+            if distance > cell_size:
+                # Двигаться только в том случае, если цель находится по крайней мере в одной клетке от вас
                 if dx > 0:
                     type_move = 'right'
                 elif dx < 0:
@@ -306,7 +312,6 @@ class LifeUser(BaseSprite):
 class PauseMenu(pygame.sprite.Sprite):
     def __init__(self, image: pygame.Surface, *sprites) -> None:
         super().__init__(*sprites)
-        print('da')
         self.image = image
         self.rect = self.image.get_rect(center=(width // 2, height // 2))
 
@@ -318,6 +323,21 @@ class PauseMenu(pygame.sprite.Sprite):
                 return 'back_menu'
             elif 356 <= relative_x <= 476 and 182 <= relative_y <= 222:
                 return 'back_game'
+
+
+class ExitMenu(pygame.sprite.Sprite):
+    def __init__(self, image: pygame.Surface, *sprites) -> None:
+        super().__init__(*sprites)
+        self.image = image
+        self.rect = self.image.get_rect(center=(width // 2, height // 2))
+
+    def click(self, mouse_position: tuple[int, int]) -> bool:
+        if self.rect.collidepoint(mouse_position):  # Проверяем, был ли клик мыши в зоне спрайта
+            relative_x = mouse_position[0] - self.rect.left  # Относительная координата X в пределах спрайта
+            relative_y = mouse_position[1] - self.rect.top  # Относительная координата Y в пределах спрайта
+            print(relative_x, relative_y)
+            if 100 <= relative_x <= 200 and 109 <= relative_y <= 135:
+                return True
 
 
 def sort_level(board_level: list[list[int]], images: Images, all_sprite,
@@ -376,6 +396,7 @@ def game(filename: str, control: dict[str: int], username: str, database: DataBa
     patron_sprite = pygame.sprite.Group()
     life_sprite = pygame.sprite.Group()
     pause_sprite = pygame.sprite.Group()
+    exit_sprite = pygame.sprite.Group()
     size = 800, 640
     degrees_user = (0, 180, 90, 270)
     rotate_mapping_user = {key: degree for degree, key in zip(degrees_user, control.keys())}
@@ -388,6 +409,9 @@ def game(filename: str, control: dict[str: int], username: str, database: DataBa
     patron_sprite.__str__()
     load_bord = service.load_level(filename=filename)
     flag_pause = False
+    flag_exit = False
+    pause = None
+    exit_menu = None
     player_start_pos = sort_level(load_bord, images,
                                   all_sprite=all_sprite,
                                   box_sprite=box_sprite,
@@ -412,7 +436,7 @@ def game(filename: str, control: dict[str: int], username: str, database: DataBa
                       user_sprite,
                       all_sprite)
     while running:
-        if flag_pause is False:
+        if flag_pause is False and flag_exit is False:
             if count_destroyed_user in (1, 2) and len(user_sprite.sprites()) < 1:
                 player_life -= 1
                 life_sprite.sprites()[player_life].image_update()
@@ -425,12 +449,11 @@ def game(filename: str, control: dict[str: int], username: str, database: DataBa
                                   user_sprite,
                                   all_sprite)
             if count_destroyed_user == 3:
-                running = False
-                pygame.quit()
-                database.update_data(username=username, user=player_life, enemy=count_destroyed_enemy)
-                pygame.mixer.init()
-                pygame.init()
-                main.menu()
+                exit_menu = ExitMenu(images.gameover, all_sprite, exit_sprite)
+                flag_exit = True
+            elif len(enemy_sprite) == 0:
+                flag_exit = True
+                exit_menu = ExitMenu(images.win, all_sprite, exit_sprite)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -442,6 +465,7 @@ def game(filename: str, control: dict[str: int], username: str, database: DataBa
                                enemy_sprite,
                                patron_sprite,
                                all_sprite)
+                        pygame.mixer.Sound.play(button_shot)  # Звук при нажатии на кнопку
                     elif event.key == pygame.K_ESCAPE:
                         flag_pause = not flag_pause
                         pause = PauseMenu(images.pause, pause_sprite, all_sprite)
@@ -469,7 +493,7 @@ def game(filename: str, control: dict[str: int], username: str, database: DataBa
             all_sprite.draw(screen)
             pygame.display.flip()
             clock.tick(fps)
-        else:
+        elif flag_pause is True and flag_exit is False:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -484,12 +508,27 @@ def game(filename: str, control: dict[str: int], username: str, database: DataBa
                         if result == 'back_menu':
                             pygame.quit()
                             pygame.init()
-
-                            main.menu()
+                            main.menu(username)
                         elif result == 'back_game':
                             all_sprite.remove(pause_sprite.sprites()[0])
                             pause_sprite.empty()
                             flag_pause = not flag_pause
+        elif flag_exit is True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        result = exit_menu.click(pygame.mouse.get_pos())
+                        if result:
+                            running = False
+                            pygame.quit()
+                            database.update_data(username=username,
+                                                 user=count_destroyed_user,
+                                                 enemy=count_destroyed_enemy)
+                            pygame.mixer.init()
+                            pygame.init()
+                            main.menu(username)
 
 
 if __name__ == '__main__':

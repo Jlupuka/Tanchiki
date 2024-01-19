@@ -50,5 +50,8 @@ def load_animation(rotate: bool, *name_dir: str, size: int = 32) -> list[pygame.
 
 
 def percent_win(userdestroyed: int, enemydestroyed: int) -> str:
-    result = userdestroyed / (userdestroyed + enemydestroyed) * 100
-    return f'{result:.2F} %'
+    if enemydestroyed != 0:
+        result = userdestroyed / (userdestroyed + enemydestroyed) * 100
+        return f'{result:.2F} %'
+    else:
+        return f'0 %'

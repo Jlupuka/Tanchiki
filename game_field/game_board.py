@@ -15,6 +15,8 @@ class Images:
             service.load_image('life_false.png', 'life', size=cell_size)
         ]
         self.pause = service.load_image('pause.png')
+        self.win = service.load_image('win.png')
+        self.gameover = service.load_image('gameover.png')
 
 
 class Board(Images):

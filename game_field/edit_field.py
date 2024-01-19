@@ -19,8 +19,7 @@ class EditableBoard(game_board.Board):
 
     def save_to_file(self) -> None:
         max_level = service.top_level()
-        print(max_level)
-        with open(f'levels/level_{max_level + 1}.txt', 'w') as file:
+        with open(f'game_field/levels/level_{max_level + 1}.txt', 'w') as file:
             for row in self.board:
                 file.write(','.join(map(str, row)))
                 file.write('\n')
@@ -75,7 +74,7 @@ def edit_window(username: str):
                     pygame.quit()
                     pygame.init()
                     pygame.mixer.init()
-                    main.menu(username)
+                    main.menu()
         screen.fill(pygame.Color('black'))
         life.render(screen)
         if patron and user_tank:

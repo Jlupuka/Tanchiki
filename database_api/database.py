@@ -72,7 +72,7 @@ class DataBase:
         WHERE
             username = ?
         """
-        result = self.cursor.execute(sql, (username,)).fetchone()[0]
+        result = self.cursor.execute(sql, (username,)).fetchone()
         return bool(result)
 
     def create_account(self, username: str, password: str) -> None:
@@ -109,7 +109,7 @@ class DataBase:
         WHERE
             username = ?
             """
-        result = self.cursor.execute(sql, (username,)).fetchone()[0]
+        result = self.cursor.execute(sql, (username,)).fetchone()
         return result
 
     def update_data(self, username: str, user: int, enemy: int) -> None:
