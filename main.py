@@ -44,7 +44,7 @@ control: dict[str: int] = {
 
 
 def title_text(scr, message, x, y, font_color=CLASSIC, font_size=150,
-               font_type='Styles/bitcell_memesbruh03.ttf'):  # Функция создания кнопки
+               font_type='../Styles/bitcell_memesbruh03.ttf'):  # Функция создания кнопки
     font_type = pygame.font.Font(font_type, font_size)  # Шрифт + Размер
     text = font_type.render(message, True, font_color)  # Текст + Цвет
     button_rect = text.get_rect(center=(x, y))  # Расположение
